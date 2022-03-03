@@ -1,5 +1,5 @@
-# Advanced NETCONF Explorer
-Advanced NETCONF explorer and NETCONF client library for Java
+# YANG Explorer
+YANG explorer and NETCONF client library for Java
 
 This is a graphical explorer for YANG models supported by a NETCONF device or service orchestrator. Features include:
 * Retrieving all YANG models supported by a device or orchestrator using the NETCONF monitoring standard.
