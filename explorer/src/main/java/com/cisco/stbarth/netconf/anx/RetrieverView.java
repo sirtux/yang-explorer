@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Cisco Systems
  *
  * Author: Steven Barth <stbarth@cisco.com>
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@ import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.themes.ValoTheme;
+import org.opendaylight.yangtools.yang.model.util.SimpleSchemaContext;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,7 +44,7 @@ import java.util.Optional;
 @SuppressWarnings("serial")
 public class RetrieverView extends VerticalLayout {
 
-	public RetrieverView(MainUI ui, VaadinRequest request) {
+    public RetrieverView(MainUI ui, VaadinRequest request) {
         String profilePath = "profiles.xml";
         setSizeFull();
 
@@ -55,13 +56,14 @@ public class RetrieverView extends VerticalLayout {
 
         HorizontalLayout logo = new HorizontalLayout();
         logo.setSpacing(true);
-        
+
         loginPanel.addComponent(logo);
 
-        Label welcome = new Label("Advanced Netconf Explorer");
+
+        Label welcome = new Label("YANG Explorer");
         welcome.addStyleName("welcome");
         welcome.addStyleName(ValoTheme.LABEL_H1);
-        
+
         VerticalLayout labels = new VerticalLayout(welcome);
         labels.setComponentAlignment(welcome, Alignment.MIDDLE_CENTER);
         loginPanel.addComponent(labels);
@@ -72,12 +74,12 @@ public class RetrieverView extends VerticalLayout {
         subtitle.addStyleName(ValoTheme.LABEL_COLORED);
         loginPanel.addComponent(subtitle);
 
-        HorizontalLayout fields = new HorizontalLayout();
+        VerticalLayout fields = new VerticalLayout();
         fields.setSpacing(true);
         fields.addStyleName("fields");
 
         final Button connect = new Button("Login");
-        connect.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        connect.addStyleName(ValoTheme.BUTTON_FRIENDLY);
         connect.setClickShortcut(KeyCode.ENTER);
 
         final ComboBox<String> hostname = new ComboBox<>("NETCONF Host (optional :port)");
@@ -128,12 +130,12 @@ public class RetrieverView extends VerticalLayout {
         final CheckBox remember = new CheckBox("Remember credentials");
         extraFields.addComponents(cacheModels, remember);
 
-        
+
         // Apply profile credentials if selected
         XMLElement loadedProfiles = profiles;
         hostname.addValueChangeListener(x -> {
             Optional<XMLElement> profile = loadedProfiles.find(
-                String.format("profile[hostname='%s']", hostname.getValue())).findAny();
+                    String.format("profile[hostname='%s']", hostname.getValue())).findAny();
             profile.flatMap(p -> p.getFirst("username")).map(XMLElement::getText).ifPresent(username::setValue);
             profile.flatMap(p -> p.getFirst("password")).map(XMLElement::getText).ifPresent(password::setValue);
             profile.ifPresent(p -> remember.setValue(true));
@@ -155,7 +157,7 @@ public class RetrieverView extends VerticalLayout {
             }
 
             savedProfiles.find(String.format("profile[hostname='%s']", hostname.getValue()))
-                .findAny().ifPresent(XMLElement::remove);
+                    .findAny().ifPresent(XMLElement::remove);
 
             if (remember.getValue()) {
                 savedProfiles.createChild("profile")
@@ -230,8 +232,14 @@ public class RetrieverView extends VerticalLayout {
             ui.parser = new NetconfYangParser();
             progressBar.setIndeterminate(false);
 
-            if (cacheModels.getValue())
-                ui.parser.setCacheDirectory(new File("..", "yangcache").toString());
+            if (cacheModels.getValue()){
+                File file = new File("..", "yangcache");
+                if(!file.exists()){
+                    file.mkdirs();
+                }
+
+                ui.parser.setCacheDirectory(file.toString());
+            }
 
             try (NetconfSession session = ui.client.createSession()) {
                 Map<String, String> schemas = ui.parser.getAvailableSchemas(session);
@@ -243,19 +251,19 @@ public class RetrieverView extends VerticalLayout {
                     progressBar.setValue(((float)iteration) / schemas.size());
                     ui.push();
                 });
-    
+
                 // Actually parse the YANG models using ODL yangtools
                 label.setValue(String.format("Parsing schemas. This may take a minute..."));
                 progressBar.setIndeterminate(true);
                 ui.push();
-    
+
                 ui.parser.parse();
-    
+
                 if (ui.parser.getSchemaContext() != null)
                     ui.showMain();
                 else
                     Notification.show("Failed to parse schemas: no valid YANG models found!",
-                            Notification.Type.ERROR_MESSAGE);    
+                            Notification.Type.ERROR_MESSAGE);
             } catch (Exception e) {
                 Notification.show("Failed to retrieve schemas: " + (e.getCause() != null ?
                         e.getCause().getMessage() : e.getMessage()), Notification.Type.ERROR_MESSAGE);
@@ -268,8 +276,8 @@ public class RetrieverView extends VerticalLayout {
         loginPanel.addComponent(fields);
         loginPanel.addComponent(extraFields);
 
-		addComponent(loginPanel);
-		setComponentAlignment(loginPanel, Alignment.MIDDLE_CENTER);
-		setExpandRatio(loginPanel, 1.0f);
-	}
+        addComponent(loginPanel);
+        setComponentAlignment(loginPanel, Alignment.MIDDLE_CENTER);
+        setExpandRatio(loginPanel, 1.0f);
+    }
 }

@@ -51,7 +51,7 @@ public class MainUI extends com.vaadin.ui.UI {
 
     @Override
     protected void init(VaadinRequest vaadinRequest) {
-    	Page.getCurrent().setTitle("Advanced Netconf Explorer");
+    	Page.getCurrent().setTitle("YANG Explorer");
         addStyleName(ValoTheme.UI_WITH_MENU);
         
         setContent(new RetrieverView(this, vaadinRequest));

@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Cisco Systems
  *
  * Author: Steven Barth <stbarth@cisco.com>
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,18 +71,18 @@ public final class MainView extends VerticalLayout implements View {
     XMLElement selectedData;
 
     public MainView(String host, String username, String password,
-            NetconfClient client, NetconfYangParser parser, Map<String,String> capabilities) {
+                    NetconfClient client, NetconfYangParser parser, Map<String,String> capabilities) {
         this.host = host;
         this.username = username;
         this.password = password;
-	    this.client = client;
-	    this.parser = parser;
-        
+        this.client = client;
+        this.parser = parser;
+
         setSizeFull();
         setMargin(false);
 
         // Build topbar
-        Label title = new Label("Advanced Netconf Explorer");
+        Label title = new Label("YANG Explorer");
         title.addStyleName("topbartitle");
         title.setSizeUndefined();
 
@@ -116,110 +116,7 @@ public final class MainView extends VerticalLayout implements View {
         addComponent(mainLayout);
         setExpandRatio(mainLayout, 1.0f);
 
-        // Define static part of sidebar, this will always be visible
-        VerticalLayout sidebar = new VerticalLayout();
-        sidebar.addStyleName(ValoTheme.MENU_PART);
-        sidebar.addStyleName("no-vertical-drag-hints");
-        sidebar.addStyleName("no-horizontal-drag-hints");
-        mainLayout.addComponent(new Panel(sidebar));
 
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        Button homeButton = new Button("Start", VaadinIcons.HOME);
-        homeButton.addClickListener(x -> showHomeScreen());
-        buttonLayout.addComponent(homeButton);
-
-        try {
-            buttonLayout.addComponent(new NetconfTools(this).createComponent());
-        } catch (NetconfException e) {
-            Notification.show(e.getMessage(), Notification.Type.ERROR_MESSAGE);
-        }
-        sidebar.addComponent(buttonLayout);
-
-        HorizontalLayout downloadTools = new HorizontalLayout();
-        downloadTools.setDefaultComponentAlignment(Alignment.BOTTOM_CENTER);
-
-        ComboBox<YangTextSchemaSource> modelSelect = new ComboBox<>("YANG Models");
-        modelSelect.setWidth("400px");
-        modelSelect.setIcon(VaadinIcons.DOWNLOAD);
-        modelSelect.setItemCaptionGenerator(x -> x.getIdentifier().toYangFilename());
-        modelSelect.setItems(parser.getSources().stream().sorted((a, b) ->
-                a.getIdentifier().toYangFilename().compareTo(b.getIdentifier().toYangFilename())));
-        modelSelect.setEmptySelectionAllowed(false);
-        modelSelect.setTextInputAllowed(true);
-
-        Button viewButton = new Button("View", VaadinIcons.FILE_CODE);
-        viewButton.setEnabled(false);
-        viewButton.addClickListener(x -> {
-            Window yangWindow = new Window("YANG Model "
-                .concat(modelSelect.getValue().getIdentifier().toYangFilename()));
-            yangWindow.setModal(true);
-            yangWindow.setDraggable(true);
-            yangWindow.setResizable(false);
-            yangWindow.setWidth("1000px");
-            yangWindow.setHeight("700px");
-
-            try {
-                ByteArrayOutputStream yangStream = new ByteArrayOutputStream();
-                modelSelect.getValue().copyTo(yangStream);
-
-                TextArea yangText = new TextArea();
-                yangText.setReadOnly(true);
-                yangText.setSizeFull();
-                yangText.setValue(new String(yangStream.toByteArray(), StandardCharsets.UTF_8));
-                
-                VerticalLayout yangLayout = new VerticalLayout(yangText);
-                yangLayout.setSizeFull();
-
-                yangWindow.setContent(yangLayout);
-                UI.getCurrent().addWindow(yangWindow);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        modelSelect.addValueChangeListener(x -> viewButton.setEnabled(x.getValue() != null));
-
-        Button downloadButton = new Button("Download all", VaadinIcons.FILE_ZIP);
-        new FileDownloader(new StreamResource(() -> {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ZipOutputStream zipStream = new ZipOutputStream(outputStream);
-            zipStream.setLevel(9);
-
-            parser.getSources().forEach(source -> {
-                try {
-                    zipStream.putNextEntry(new ZipEntry(source.getIdentifier().toYangFilename()));
-                    source.copyTo(zipStream);
-                    zipStream.closeEntry();
-                } catch (IOException e) {}
-            });
-
-            try {
-                zipStream.close();
-            } catch (IOException e) {};
-
-            return new ByteArrayInputStream(outputStream.toByteArray());
-        }, "yang-models-" + host + ".zip")).extend(downloadButton);
-        downloadTools.addComponents(modelSelect, viewButton, downloadButton);
-        sidebar.addComponent(downloadTools);
-
-        ComboBox<String> capabilitySelect = new ComboBox<>("NETCONF Capabilities", capabilities.entrySet().stream()
-                .map(x -> x.getKey().concat(x.getValue())).sorted().collect(Collectors.toList()));
-        capabilitySelect.setWidth("700px");
-        capabilitySelect.setIcon(VaadinIcons.LINES);
-        sidebar.addComponent(capabilitySelect);
-
-        if (capabilities.containsKey("http://cisco.com/ns/yang/Cisco-IOS-XR-telemetry-model-driven-cfg"))
-            sidebar.addComponent(new TelemetryTools(this).createComponent());
-
-        sidebar.addComponent((gnmiTools = new GNMITools(this)).createComponent());
-
-        sidebarPanel = new VerticalLayout();
-        sidebarPanel.setMargin(false);
-        sidebar.addComponent(sidebarPanel);
-        sidebar.setExpandRatio(sidebarPanel, 1.0f);
-
-        showHomeScreen();
-
-        // Define content (right-hand side)
         VerticalLayout contentLayout = new VerticalLayout();
         contentLayout.setSizeFull();
 
@@ -312,10 +209,10 @@ public final class MainView extends VerticalLayout implements View {
         });
 
         dataFilterClear.addClickListener(e -> {
-           dataNodeFilter.clear();
-           dataNodeFilter.focus();
-           dataValueFilter.clear();
-           dataFilterApply.click();
+            dataNodeFilter.clear();
+            dataNodeFilter.focus();
+            dataValueFilter.clear();
+            dataFilterApply.click();
         });
 
         showSchemas.addClickListener(x -> {
@@ -326,7 +223,122 @@ public final class MainView extends VerticalLayout implements View {
         });
 
         treePanel.setContent(showSchemaTree("", ""));
+
+
+        // Define static part of sidebar, this will always be visible
+        VerticalLayout sidebar = new VerticalLayout();
+        sidebar.addStyleName(ValoTheme.MENU_PART);
+        sidebar.addStyleName("no-vertical-drag-hints");
+        sidebar.addStyleName("no-horizontal-drag-hints");
+        mainLayout.addComponent(new Panel(sidebar));
+
+        HorizontalLayout buttonLayout = new HorizontalLayout();
+        Button homeButton = new Button("Start", VaadinIcons.HOME);
+        homeButton.addClickListener(x -> showHomeScreen());
+        buttonLayout.addComponent(homeButton);
+
+        try {
+            buttonLayout.addComponent(new NetconfTools(this).createComponent());
+        } catch (NetconfException e) {
+            Notification.show(e.getMessage(), Notification.Type.ERROR_MESSAGE);
+        }
+        sidebar.addComponent(buttonLayout);
+
+        HorizontalLayout downloadTools = new HorizontalLayout();
+        downloadTools.setDefaultComponentAlignment(Alignment.BOTTOM_CENTER);
+
+        ComboBox<YangTextSchemaSource> modelSelect = new ComboBox<>("YANG Models");
+        modelSelect.setWidth("400px");
+        modelSelect.setIcon(VaadinIcons.DOWNLOAD);
+        modelSelect.setItemCaptionGenerator(x -> x.getIdentifier().toYangFilename());
+        modelSelect.setItems(parser.getSources().stream().sorted((a, b) ->
+                a.getIdentifier().toYangFilename().compareTo(b.getIdentifier().toYangFilename())));
+        modelSelect.setEmptySelectionAllowed(false);
+        modelSelect.setTextInputAllowed(true);
+
+        Button viewButton = new Button("View", VaadinIcons.FILE_CODE);
+        viewButton.setEnabled(false);
+        viewButton.addClickListener(x -> {
+            Window yangWindow = new Window("YANG Model "
+                    .concat(modelSelect.getValue().getIdentifier().toYangFilename()));
+            yangWindow.setModal(true);
+            yangWindow.setDraggable(true);
+            yangWindow.setResizable(false);
+            yangWindow.setWidth("1000px");
+            yangWindow.setHeight("700px");
+
+            try {
+                ByteArrayOutputStream yangStream = new ByteArrayOutputStream();
+                modelSelect.getValue().copyTo(yangStream);
+
+                TextArea yangText = new TextArea();
+                yangText.setReadOnly(true);
+                yangText.setSizeFull();
+                yangText.setValue(new String(yangStream.toByteArray(), StandardCharsets.UTF_8));
+
+                VerticalLayout yangLayout = new VerticalLayout(yangText);
+                yangLayout.setSizeFull();
+
+                yangWindow.setContent(yangLayout);
+                UI.getCurrent().addWindow(yangWindow);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        modelSelect.addValueChangeListener(x -> viewButton.setEnabled(x.getValue() != null));
+
+        Button downloadButton = new Button("Download all", VaadinIcons.FILE_ZIP);
+        new FileDownloader(new StreamResource(() -> {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ZipOutputStream zipStream = new ZipOutputStream(outputStream);
+            zipStream.setLevel(9);
+
+            parser.getSources().forEach(source -> {
+                try {
+                    zipStream.putNextEntry(new ZipEntry(source.getIdentifier().toYangFilename()));
+                    source.copyTo(zipStream);
+                    zipStream.closeEntry();
+                } catch (IOException e) {}
+            });
+
+            try {
+                zipStream.close();
+            } catch (IOException e) {};
+
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        }, "yang-models-" + host + ".zip")).extend(downloadButton);
+        downloadTools.addComponents(modelSelect, viewButton, downloadButton);
+        sidebar.addComponent(downloadTools);
+
+        ComboBox<String> capabilitySelect = new ComboBox<>("NETCONF Capabilities", capabilities.entrySet().stream()
+                .map(x -> x.getKey().concat(x.getValue())).sorted().collect(Collectors.toList()));
+        capabilitySelect.setWidth("700px");
+        capabilitySelect.setIcon(VaadinIcons.LINES);
+        sidebar.addComponent(capabilitySelect);
+
+        if (capabilities.containsKey("http://cisco.com/ns/yang/Cisco-IOS-XR-telemetry-model-driven-cfg"))
+            sidebar.addComponent(new TelemetryTools(this).createComponent());
+
+        //sidebar.addComponent((gnmiTools = new GNMITools(this)).createComponent());
+
+        sidebarPanel = new VerticalLayout();
+        sidebarPanel.setMargin(false);
+        sidebar.addComponent(sidebarPanel);
+        sidebar.setExpandRatio(sidebarPanel, 1.0f);
+
+        showHomeScreen();
+
+        // Define content (right-hand side)
+
     }
+
+
+
+
+
+
+
+
 
     // Show the schema tree based on the current collected YANG models
     private Tree<WrappedYangNode> showSchemaTree(String moduleFilter, String fieldFilter) {
@@ -395,7 +407,7 @@ public final class MainView extends VerticalLayout implements View {
                 if (module.getNamespace().toString().equals(namespace))
                     WrappedYangNode.byPath(new WrappedYangNode(module), path).ifPresent(this::showYangNode);
         });
-        
+
         // Get selected schema elements and build a NETCONF combined subtree-filter to retrieve all of them with a single get-call
         LinkedList<XMLElement> subtreeFilter = new LinkedList<>();
         Set<WrappedYangNode> items = schemaTree.getSelectedItems();
@@ -409,8 +421,8 @@ public final class MainView extends VerticalLayout implements View {
             // Only add new subtree filter if we don't have it or any parent element selected already
             if (unique) {
                 item.createNetconfTemplate().map(Stream::of).orElse(item.getChildren()
-                    .map(WrappedYangNode::createNetconfTemplate).filter(Optional::isPresent).map(Optional::get))
-                    .forEach(subtreeFilter::add);
+                                .map(WrappedYangNode::createNetconfTemplate).filter(Optional::isPresent).map(Optional::get))
+                        .forEach(subtreeFilter::add);
             }
         }
 
@@ -433,7 +445,7 @@ public final class MainView extends VerticalLayout implements View {
                     dataQuery = newQuery;
                 } else {
                     dataElements = subtreeFilter.isEmpty() ? session.getConfig(dataSource) :
-                                session.getConfig(dataSource, subtreeFilter);
+                            session.getConfig(dataSource, subtreeFilter);
                 }
             } catch (NetconfException e) {
                 e.printStackTrace();
@@ -474,8 +486,8 @@ public final class MainView extends VerticalLayout implements View {
 
     // Transform XML data to a Vaadin treedata object
     private static boolean addXMLToTree(TreeData<XMLElement> data, XMLElement element, XMLElement parent,
-                                 Collection<String> nodeQuery, Collection<String> valueQuery) {
-	    String name = element.getName().toLowerCase();
+                                        Collection<String> nodeQuery, Collection<String> valueQuery) {
+        String name = element.getName().toLowerCase();
         boolean nodeOkay = nodeQuery.stream().filter(name::contains).count() == nodeQuery.size();
         boolean valueOkay = valueQuery.isEmpty();
         boolean okay = false;
@@ -520,7 +532,7 @@ public final class MainView extends VerticalLayout implements View {
 
     // Recursively apply element expansion to a tree based on meta-attributes set by addXMLToTree
     private static int applyXMLExpanded(Tree<XMLElement> tree, XMLElement element, int limit) {
-	    if (element.getAttribute("expand").equals("1") && limit > 0) {
+        if (element.getAttribute("expand").equals("1") && limit > 0) {
             int limitBefore = limit;
             tree.expand(element);
 
@@ -535,10 +547,10 @@ public final class MainView extends VerticalLayout implements View {
 
     // Apply YANG schema filters to data tree
     private static int expandXMLSelected(Tree<XMLElement> tree, Iterable<XMLElement> elements, List<String> path, int limit) {
-	    if (path.size() < 1 || limit < 1)
-	        return limit;
+        if (path.size() < 1 || limit < 1)
+            return limit;
 
-	    path = new LinkedList<>(path);
+        path = new LinkedList<>(path);
         String hop = path.remove(0);
         for (XMLElement element: elements) {
             int limitBefore = limit;
@@ -554,7 +566,7 @@ public final class MainView extends VerticalLayout implements View {
 
     // Render home view
     private void showHomeScreen() {
-	    sidebarPanel.removeAllComponents();
+        sidebarPanel.removeAllComponents();
 
         VerticalLayout warningLayout = new VerticalLayout();
         for (String warning: parser.getWarnings()) {
@@ -569,7 +581,7 @@ public final class MainView extends VerticalLayout implements View {
 
     // Show detail table for a selected YANG schema node
     void showYangNode(WrappedYangNode node) {
-	    selectedNode = node;
+        selectedNode = node;
         sidebarPanel.removeAllComponents();
 
         if (gnmiTools != null)
@@ -579,7 +591,7 @@ public final class MainView extends VerticalLayout implements View {
         parameters.add(new AbstractMap.SimpleEntry<>("Name", node.getName()));
         parameters.add(new AbstractMap.SimpleEntry<>("Namespace", node.getNamespace()));
         parameters.add(new AbstractMap.SimpleEntry<>("Type", node.getType() + " (" +
-                        (node.isConfiguration() ? "configuration" : "operational") + ")"));
+                (node.isConfiguration() ? "configuration" : "operational") + ")"));
 
         String type = node.getDataType();
         if (!type.isEmpty())
@@ -631,10 +643,10 @@ public final class MainView extends VerticalLayout implements View {
 
     @Override
     public void beforeLeave(ViewBeforeLeaveEvent event) {
-	    try {
+        try {
             client.close();
         } catch (NetconfException e) {
-	        e.printStackTrace();
+            e.printStackTrace();
         }
     }
 }
