@@ -47,7 +47,6 @@ enabled device or orchestrator supporting NETCONF Monitoring [RFC 6022](https://
 
 4. By selecting one or more nodes in the model tree so that they are highlighted in blue, you can use the "Show Data" function to retrieve and visualize the corresponding operational or configurational data from the device. The model tree will then be replaced by the data tree for the selected values and the search bar will let you search by both model names and also values. Again by clicking a node, details will be shown on the left-hand side.
 
-5. For IOS-XR telemetry you will be able to view and edit sensors groups by using the Telemetry Tools on the left-hand side. Select or type the name of a sensor group and use Edit to make changes to it. If you have previously selected a node in the model browser, its sensor path will be prepopulated in the sensor group editor for convenience. If your device runs a 64-bit version of IOS XR, you can also view a JSON-encoding of the live feed of the Telemetry data exactly as it is sent to your telemetry collector.
 
 
 

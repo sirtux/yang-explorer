@@ -1,0 +1,18 @@
+<profiles>
+    
+  <profile>
+        
+    <hostname>sandbox-iosxr-1.cisco.com</hostname>
+        
+    <username>admin</username>
+        
+    <password>admin</password>
+      
+  </profile>
+  
+  <profile>
+    <hostname>sandbox-iosxr-1.cisco.com:830</hostname>
+    <username>admin</username>
+    <password>C1sco12345</password>
+  </profile>
+</profiles>
