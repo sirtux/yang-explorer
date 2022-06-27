@@ -7,7 +7,6 @@ This is a graphical explorer for YANG models supported by a NETCONF device or se
 * Filtering the model tree by module name and searching the names and descriptions of the YANG nodes in it (e.g. “neighbor count” or “bgp” “neighbor count”).
 * Downloading a ZIP-Archive of all YANG-models supported by the device or orchestrator.
 * Showing details and generating metadata for a YANG node, e.g. the description, the (sensor-)path, a subtree-filter (for NETCONF development) etc.
-* GNMI and IOS XR Telemetry support tools to edit sensor groups and show live data using GRPC.
 * Browsing and searching live (operational) data for selected YANG models.
 
 ## Setup
@@ -46,11 +45,3 @@ enabled device or orchestrator supporting NETCONF Monitoring [RFC 6022](https://
 3. The following start screen is divided in two parts. On the left-hand side you have a menu listing all YANG models including a simple name-based search and the option to show an individual YANG model in source or download all YANG models as a ZIP-file. On the right-hand side you have the data model tree which allows you to browse and search within the data model (the search will match against the YANG field names and descriptions). If you click on an element details will be shown on the left-hand side.
 
 4. By selecting one or more nodes in the model tree so that they are highlighted in blue, you can use the "Show Data" function to retrieve and visualize the corresponding operational or configurational data from the device. The model tree will then be replaced by the data tree for the selected values and the search bar will let you search by both model names and also values. Again by clicking a node, details will be shown on the left-hand side.
-
-
-
-
-## ANC - Java NETCONF client library
-ANC is the basis of the explorer and offers abstraction for most of the features of NETCONF.
-It is packaged as a maven artifact so it can be installed using `mvn install` in the `anc` directory. 
-
