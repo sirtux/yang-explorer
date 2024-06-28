@@ -15,6 +15,11 @@ RUN mkdir -p /usr/share/man/man1 && apt update && \
     rm -rf /var/lib/jetty9/webapps/root && cd / && rm -r /src /root/.m2 && \
     apt remove -y openjdk-11-jdk-headless maven && apt -y autoremove
 
+RUN chown 100 -R /usr/share/yangcache
+RUN chown 100 -R /var/lib/jetty9/
+RUN chown 100 -R /usr/share/jetty9/
+
+USER 100
 WORKDIR /
 EXPOSE 8080
 CMD ["/usr/share/jetty9/bin/jetty.sh", "run"]
