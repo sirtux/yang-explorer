@@ -6,7 +6,7 @@ COPY explorer /src/explorer/
 COPY grpc /src/grpc/
 COPY pom.xml /src/
 
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/default-java
 RUN mkdir -p /usr/share/man/man1 && apt update && \
     apt -y --no-install-recommends install openjdk-11-jdk-headless jetty9 maven && \
     cd /src && mvn package javadoc:javadoc && \
