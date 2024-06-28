@@ -1,5 +1,5 @@
 FROM debian:buster-slim
-LABEL maintainer "Frank Feng <frank.fengchong@huawei.com>"
+LABEL maintainer "Tom Eichhorn <tom@wirkbetrieb.net>"
 
 COPY anc /src/anc/
 COPY explorer /src/explorer/
