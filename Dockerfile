@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 LABEL maintainer "Tom Eichhorn <tom@wirkbetrieb.net>"
 
 COPY anc /src/anc/
@@ -6,14 +6,16 @@ COPY explorer /src/explorer/
 COPY grpc /src/grpc/
 COPY pom.xml /src/
 
-ENV JAVA_HOME=/usr/lib/jvm/default-java
+ARG TARGETARCH
+
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-$TARGETARCH
 RUN mkdir -p /usr/share/man/man1 && apt update && \
-    apt -y --no-install-recommends install openjdk-11-jdk-headless jetty9 maven && \
+    apt -y --no-install-recommends install openjdk-17-jdk-headless jetty9 maven && \
     cd /src && mvn package javadoc:javadoc && \
     cp /src/explorer/target/*.war /var/lib/jetty9/webapps/ROOT.war && \
     cp -a /src/anc/target/site/apidocs /var/lib/jetty9/webapps/ && mkdir /usr/share/yangcache && \
     rm -rf /var/lib/jetty9/webapps/root && cd / && rm -r /src /root/.m2 && \
-    apt remove -y openjdk-11-jdk-headless maven && apt -y autoremove
+    apt remove -y openjdk-17-jdk-headless maven && apt -y autoremove
 
 RUN chown 100 -R /usr/share/yangcache
 RUN chown 100 -R /var/lib/jetty9/
