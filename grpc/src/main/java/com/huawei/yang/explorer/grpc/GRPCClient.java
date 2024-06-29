@@ -109,8 +109,8 @@ public class GRPCClient implements AutoCloseable {
         headers.put(Metadata.Key.of("password", Metadata.ASCII_STRING_MARSHALLER), password);
 
         channel = channelBuilder.build();
-        grpcStub = MetadataUtils.attachHeaders(gRPCConfigOperGrpc.newStub(channel), headers);
-        gnmiStub = MetadataUtils.attachHeaders(gNMIGrpc.newStub(channel), headers);
+        //grpcStub = MetadataUtils.attachHeaders(gRPCConfigOperGrpc.newStub(channel), headers);
+        //gnmiStub = MetadataUtils.attachHeaders(gNMIGrpc.newStub(channel), headers);
     }
 
     public static String formatGNMIPath(GNMI.Path path) {
